@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+
+        html, body {
+            height: calc(100% - 5%);
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: rgb(0, 0, 0);
+            color: #ffffff;
+            font-family: 'Trebuchet MS', 'Helvetica Neue', Helvetica, sans-serif;
+            font-weight: bold;
+        }
+
+        .header {
+            width: 100%;
+            height: 50px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: rgb(20, 20, 20);
+            display: flex;
+        }
+
+        .left-container-headers {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            place-content: center;
+            flex-direction: column;
+        }
+
+        .link-main {
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        p {
+            margin: 0;
+            padding: 0;
+        }
+
+        button {
+            font-family: 'Trebuchet MS', 'Helvetica Neue', Helvetica, sans-serif;
+            font-weight: bold;
+        }
+
+        .right-container-headers {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            place-content: center;
+            gap: 20px;
+        }
+
+        .button.active {
+            position: relative;
+            background-color: transparent;
+            border: None;
+            padding: 4px;
+            color: #ffffff;
+            font-size: 20px;
+        }
+
+        .button.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            width: 0;
+            height: 2px;
+            background-color: #15ff00;
+            transition: width 0.3s, left 0.3s; /* Добавляем анимацию движения влево и вправо */
+        }
+
+        .button.active:hover::before {
+            width: 100%;
+            left: 0; /* При наведении оставляем полоску слева */
+        }
+
+        .button.active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            bottom: -2px;
+            width: 0;
+            height: 2px;
+            background-color: #15ff00;
+            transition: width 0.3s, right 0.3s; /* Анимация движения вправо и влево */
+        }
+
+        .button.active:hover::after {
+            width: 100%;
+            right: 0; /* При наведении оставляем полоску справа */
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            margin-top: 10%;
+        }
+
+        .container-button {
+            display: flex;
+            gap: 10px;
+        }
+
+        .container-settings {
+            width: 100%;
+            height: 100%;
+            margin-bottom: 6.5%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            & :where(p) {
+                color: #15ff00;
+            }
+
+            & :where(input, select) {
+                border: none;
+                background-color: rgb(35, 35, 35);
+                border-radius: 5px;
+                color: #ffffff;
+                height: 25px;
+                padding-left: 5px;
+
+                &:focus {
+                    outline: none;
+                }
+
+                &.input-width {
+                    width: 250px;
+                }
+
+                &.select-width {
+                    width: 260px;
+                }
+            }
+        }
+
+        .all-settings {
+            width: 260px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .comment {
+            color: gray;
+            font-size: 10px;
+        }
+
+        .button-settings {
+            width: 200px;
+            height: 40px;
+            font-size: 25px;
+            color: #ffffff;
+            background-color: transparent;
+            border: None;
+            transition: color .4s, border-bottom .4s;
+        }
+
+        .button-settings.active {
+            color: #15ff00;
+            border-bottom: #15ff00 solid 2px;
+            transition: color .4s, border-bottom .4s;
+        }
+
+        .button-result {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .button-save, .button-back {
+            width: 200px;
+            height: 25px;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+
+            &.color-save {
+                background-color: rgb(18, 196, 2);
+            }
+
+            &.color-back {
+                background-color: rgb(35, 35, 35);
+            }
+        }
+
+        /* Нижная меню */
+
+        .header-bottom {
+            width: 100%;
+            height: 50px;
+            background-color: rgb(20, 20, 20);
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .author {
+            color: grey;
+            font-size: 10px;
+        }
+
+        .link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            color: purple;
+            text-decoration: none;
+        }
+
+        .link-image {
+            width: 20px;
+            height: 20px;
+        }
+    
+    </style>
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script>
+        function setup() {
+            new QWebChannel(qt.webChannelTransport, function (channel) {
+                window.python = channel.objects.python; // Доступ к объекту Python
+                uploadSait();
+                all_settings();
+            });
+        }
+
+        async function uploadSait() {
+            if (window.python) {
+                let jsonString = await window.python.get_information(); // Вызов метода Python при клике на кнопку
+                // Убедитесь, что информация доступна и в правильном формате
+
+                let information = JSON.parse(jsonString);
+
+                // Обновление контента на странице
+                document.querySelector('body > div.header > div.left-container-headers > a > p.name-application').textContent = information.name;
+                document.querySelector('body > div.header > div.left-container-headers > a > p:nth-child(2)').textContent = information.version;
+                document.querySelector('body > div.header-bottom > p').textContent = information.author;
+            }
+        }
+
+        async function transition(link) {
+            if (window.python) {
+                await window.python.transition(link);
+            }
+        }
+
+        async function all_settings() {
+            if (window.python) {
+                let button_all = document.querySelector('body > div.container > div > button:nth-child(1)');
+                let button_devices = document.querySelector('body > div.container > div > button:nth-child(2)');
+                if (!button_all.classList.contains('active') && button_devices.classList.contains('active') || !button_all.classList.contains('active') && !button_devices.classList.contains('active')) {
+                    button_all.classList.add('active');
+                    button_devices.classList.remove('active');
+                    let container = document.querySelector('body > div.container > div.container-settings');
+
+                    let jsonString = await window.python.all_settings_assistant();
+
+                    let information = JSON.parse(jsonString);
+
+                    container.innerHTML = 
+                    `<div class="all-settings">\
+                        <div>
+                            <p>Активация ассистента</p>
+                            <p class="comment">По этому слову ассистент будет активироваться.</p>
+                        </div>
+                        <input class="input-width" type="text" value="${information['address']}">
+                        <p>Голос ассистента</p>
+                        <select class="select-width">
+                            ${information['folders'].map(folder => `
+                            <option value="${folder}" ${folder === information['assistant'] ? 'selected' : ''}>${folder}</option>
+                            `).join('')}
+                        </select>
+                        <div>
+                            <p>Выключение ассистента</p>
+                            <p class="comment">По этому слову ассистент будет выключаться.</p>
+                        </div>    
+                        <input class="input-width" type="text" value="${information['turn_off']}">
+                        <div class="button-result">
+                            <button class="button-save color-save" onclick="all_settings_save()">Сохранить и Перезагрузить</button>
+                            <form action="main.html">
+                                <button class="button-back color-back">Назад</button>
+                            </form>
+                        </div>
+                    </div>`
+                };
+            };
+        }
+
+        async function all_settings_save() {
+            if (window.python) {
+                let address = document.querySelector('body > div.container > div.container-settings > div > input:nth-child(2)').value;
+                let assistant = document.querySelector('body > div.container > div.container-settings > div > select').value;
+                let turn_off = document.querySelector('body > div.container > div.container-settings > div > input:nth-child(6)').value;
+
+                let settings = {
+                    address: address,
+                    assistant: assistant,
+                    turn_off: turn_off
+                };
+
+                let settingsJson = JSON.stringify(settings);
+
+                await window.python.all_settings_assistant_save(settingsJson);
+            };
+        }
+
+        async function device_settings() {
+            if (window.python) {
+                let button_all = document.querySelector('body > div.container > div > button:nth-child(1)');
+                let button_devices = document.querySelector('body > div.container > div > button:nth-child(2)');
+                if (button_all.classList.contains('active') && !button_devices.classList.contains('active')) {
+                    button_devices.classList.add('active');
+                    button_all.classList.remove('active');
+                    let container = document.querySelector('body > div.container > div.container-settings');
+
+                    let jsonString = await window.python.device_settings_assistant();
+
+                    let information = JSON.parse(jsonString);
+
+                    container.innerHTML = 
+                    `<div class="all-settings">\
+                        <div>
+                            <p>Выберите микрофон</p>
+                            <p class="comment">Его будет слушать ассистент.</p>
+                        </div>
+                        <select class="select-width">
+                            ${information['devices'].map(([index, device_name]) => `
+                            <option value="${index}" ${index === information['device_index'] ? 'selected' : ''}>${device_name}</option>
+                            `).join('')}
+                        </select>
+                        <div class="button-result">
+                            <button class="button-save color-save" onclick="device_settings_save()">Сохранить и Перезагрузить</button>
+                            <form action="main.html">
+                                <button class="button-back color-back">Назад</button>
+                            </form>
+                        </div>
+                    </div>`
+                };
+            };
+        }
+
+        async function device_settings_save() {
+            if (window.python) {
+                let device_index = document.querySelector('body > div.container > div.container-settings > div > select').value;
+
+                await window.python.device_settings_assistant_save(device_index);
+            };
+        }
+
+        window.onload = setup;
+    </script>
+</head>
+    <body onload="setup()">
+        <div class="header">
+            <div class="left-container-headers">
+                <a class="link-main" href="main.html">
+                    <p class="name-application"></p>
+                    <p></p>
+                </a>
+            </div>
+            <div class="right-container-headers">
+                <form action="commands.html">
+                    <button class="button active">🤖 Команды</button>
+                </form>
+                <button class="button active">⚙ Настройки</button>
+            </div>
+        </div>
+        <div class="container">
+            <div class="container-button">
+                <button class="button-settings" onclick="all_settings()">Общее</button>
+                <button class="button-settings" onclick="device_settings()">Устройства</button>
+            </div>
+            <div class="container-settings">
+                
+            </div>
+        </div>
+        <div class="header-bottom">
+            <p class="author"></p>
+            <div style="display: flex; gap: 25px; align-items: center; justify-content: center;">
+                <a class="link" href="" onclick="transition('https://discord.gg/aCQ8f5QaaJ')">
+                    <img class="link-image" src="icons/discord.png" alt="">
+                    <p>Дискорд</p>
+                </a>
+                <a class="link" style="color: aqua;" href="" onclick="transition('https://t.me/beta_voice_assistant')">
+                    <img class="link-image" style=" width: 15px; height: 15px;" src="icons/telegram.png" alt="">
+                    <p>Телеграм</p>
+                </a>
+            </div>
+        </div>
+    </body>
+</html>

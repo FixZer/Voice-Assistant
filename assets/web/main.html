@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+
+        html, body {
+            height: calc(100% - 5%);
+            margin: 0;
+            background-color: rgb(0, 0, 0);
+            color: #ffffff;
+            font-family: 'Trebuchet MS', 'Helvetica Neue', Helvetica, sans-serif;
+            font-weight: bold;
+        }
+
+        .header {
+            width: 100%;
+            height: 50px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: rgb(20, 20, 20);
+            display: flex;
+        }
+
+        .left-container-headers {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            place-content: center;
+            flex-direction: column;
+        }
+
+        p {
+            margin: 0;
+            padding: 0;
+        }
+
+        .right-container-headers {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            place-content: center;
+            gap: 20px;
+        }
+
+        .button.active {
+            position: relative;
+            background-color: transparent;
+            border: None;
+            padding: 4px;
+            color: #ffffff;
+            font-size: 20px;
+            font-family: 'Trebuchet MS', 'Helvetica Neue', Helvetica, sans-serif;
+            font-weight: bold;
+        }
+
+        .button.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            width: 0;
+            height: 2px;
+            background-color: #15ff00;
+            transition: width 0.3s, left 0.3s; /* Добавляем анимацию движения влево и вправо */
+        }
+
+        .button.active:hover::before {
+            width: 100%;
+            left: 0; /* При наведении оставляем полоску слева */
+        }
+
+        .button.active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            bottom: -2px;
+            width: 0;
+            height: 2px;
+            background-color: #15ff00;
+            transition: width 0.3s, right 0.3s; /* Анимация движения вправо и влево */
+        }
+
+        .button.active:hover::after {
+            width: 100%;
+            right: 0; /* При наведении оставляем полоску справа */
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .info-active {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            width: 50%;
+            height: 50%;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .information-active {
+            text-align: center;
+        }
+
+        .circle {
+            width: 25%;
+            height: 28%;
+            background: radial-gradient(circle, #15ff00 5%, transparent 60%);
+            background-clip: padding-box;
+            border-radius: 50%;
+            background-size: 100% 100%;
+            background-position: 0% 0%;
+            transition: background-size 3s ease, background-position 3s ease; /* Плавный переход для изменения размера фона */
+        }
+        
+        .circle.active {
+            background-size: 450% 450%; /* Увеличиваем размер фона для анимации */
+            animation: moveGradient 5s linear infinite; /* Запускаем анимацию */
+        }
+
+        @keyframes moveGradient {
+            0% {
+                background-position: 0% 0%;
+            }
+            25% {
+                background-position: 25% 25%;
+            }
+            50% {
+                background-position: 50% 50%;
+            }
+            75% {
+                background-position: 75% 75%;
+            }
+            100% {
+                background-position: 100% 100%;
+            }
+        }
+
+        /* Дополнительная информация */
+
+        .add-information {
+            display: flex;
+            gap: 50px;
+            align-items: center;
+            justify-content: center;
+            margin-left: 20%;
+        }
+
+        .panel-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .info-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            width: 200px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }   
+
+        .add-info {
+            color: grey;
+        }
+
+        .text-microphone {
+            color: #15ff00;
+        }
+
+        .text-ram {
+            color: rgb(0, 225, 255);
+        }
+
+        /* Микрофон */
+
+        .circle-microphone {
+            width: 20px;
+            height: 20px;
+            background-color: #15ff00;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .circle-microphone::before,
+        .circle-microphone::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 255, 0, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            transition: opacity 0.4s ease-out;
+        }
+
+        .circle-microphone.active::before {
+            animation: wave-microphone 3.5s ease infinite;
+        }
+
+        .circle-microphone.active::after {
+            animation: wave-microphone 3.5s ease 1s infinite;
+        }
+
+        @keyframes wave-microphone {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(2.5);
+                opacity: 0;
+            }
+        }
+
+        /* Оперативная память */
+
+        .circle-ram {
+            width: 20px;
+            height: 20px;
+            background-color: rgb(0, 225, 255);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .circle-ram::before,
+        .circle-ram::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 225, 255, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            transition: opacity 0.4s ease-out;
+        }
+
+        .circle-ram.active::before {
+            animation: wave-ram 4.5s ease-out infinite;
+        }
+
+        .circle-ram.active::after {
+            animation: wave-ram 4.5s ease-out 2s infinite;
+        }
+
+        @keyframes wave-ram {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(2.5);
+                opacity: 0;
+            }
+        }
+
+        /* Нижная меню */
+
+        .header-bottom {
+            width: 100%;
+            height: 50px;
+            background-color: rgb(20, 20, 20);
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .author {
+            color: grey;
+            font-size: 10px;
+        }
+
+        .link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            color: purple;
+            text-decoration: none;
+        }
+
+        .link-image {
+            width: 20px;
+            height: 20px;
+        }
+    
+    </style>
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script>
+        function setup() {
+            new QWebChannel(qt.webChannelTransport, function (channel) {
+                window.python = channel.objects.python; // Доступ к объекту Python
+                uploadSite();
+                startChecking();
+            });
+        }
+
+        async function active_assistant() {
+            if (window.python) {
+                let jsonString = await window.python.get_active_assistant();
+
+                let information = JSON.parse(jsonString);
+
+                let element = document.querySelector('body > div.container > div > div');
+                if (information.active) {
+                    if (!element.classList.contains('active')) {
+                        element.classList.add('active');
+                        document.querySelector('body > div.container > div.info-active > h3').textContent = `"${information.name_active}" слушает вас`;
+                    };
+                } else {
+                    if (element.classList.contains('active')) {
+                        element.classList.remove('active');
+                        document.querySelector('body > div.container > div.info-active > h3').innerHTML = `Для активации скажите:<br>"${information.name_active}"`;
+                    };
+                };
+
+                let element_microphone_text = document.querySelector('body > div.container > div.information-panel > div > div:nth-child(1) > div.info-container > p:nth-child(2)');
+                let element_microphone_signal = document.querySelector('body > div.container > div.information-panel > div > div:nth-child(1) > div.circle-microphone')
+
+                if (information.microphone) {
+                    element_microphone_text.textContent = information.microphone;
+                    if (!element_microphone_signal.classList.contains('active')) {
+                        element_microphone_signal.classList.add('active');
+                    };
+                } else {
+                    element_microphone_text.textContent = 'Нет подключённого устройства';
+                    if (element_microphone_signal.classList.contains('active')) {
+                        element_microphone_signal.classList.remove('active');
+                    };
+                };
+
+                let element_ram_text = document.querySelector('body > div.container > div.information-panel > div > div:nth-child(2) > div.info-container > p:nth-child(2)')
+                let element_ram_signal = document.querySelector('body > div.container > div.information-panel > div > div:nth-child(2) > div.circle-ram')
+
+                if (information.ram) {
+                    element_ram_text.textContent = `RAM ${information.ram}mb`;
+                    if (!element_ram_signal.classList.contains('active')) {
+                        element_ram_signal.classList.add('active');
+                    };
+                } else {
+                    element_ram_text.textContent = 'Оперативная память не используется';
+                    if (element_ram_signal.classList.contains('active')) {
+                        element_ram_signal.classList.remove('active');
+                    };
+                };
+            }
+        }
+
+        async function uploadSite() {
+            if (window.python) {
+                let jsonString = await window.python.get_information(); // Вызов метода Python при клике на кнопку
+                // Убедитесь, что информация доступна и в правильном формате
+
+                let information = JSON.parse(jsonString)
+
+                // Обновление контента на странице
+                document.querySelector('body > div.header > div.left-container-headers > p.name-application').textContent = information.name;
+                document.querySelector('body > div.header > div.left-container-headers > p:nth-child(2)').textContent = information.version;
+                document.querySelector('body > div.container > div.info-active > h3').innerHTML = `Для активации скажите:<br>"${information.name_active}"`;
+                document.querySelector('body > div.header-bottom > p').textContent = information.author;
+            }
+        }
+
+        async function transition(link) {
+            if (window.python) {
+                await window.python.transition(link);
+            }
+        }
+
+        function startChecking() {
+            setInterval(active_assistant, 800);
+        }
+
+        window.onload = setup;
+    </script>
+</head>
+    <body onload="setup()">
+        <div class="header">
+            <div class="left-container-headers">
+                <p class="name-application"></p>
+                <p></p>
+            </div>
+            <div class="right-container-headers">
+                <form action="commands.html">
+                    <button class="button active">🤖 Команды</button>
+                </form>
+                <form action="settings.html">
+                    <button class="button active">⚙ Настройки</button>
+                </form>
+            </div>
+        </div>
+        <div class="container">
+            <div class="info-active">
+                <div class="circle"></div>
+                <h3 class="information-active">Для активации скажите:</br>"Джарвис"</h3>
+            </div>
+            <div class="information-panel">
+                <div class="add-information">
+                    <div class="panel-info">
+                        <div class="circle-microphone"></div>
+                        <div class="info-container">
+                            <p class="text-microphone">Микрофон</p>
+                            <p class="add-info"></p>
+                        </div>
+                    </div>
+                    <div class="panel-info">
+                        <div class="circle-ram"></div>
+                        <div class="info-container">
+                            <p class="text-ram">Ресурсы</p>
+                            <p class="add-info"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="header-bottom">
+            <p class="author"></p>
+            <div style="display: flex; gap: 25px; align-items: center; justify-content: center;">
+                <a class="link" href="" onclick="transition('https://discord.gg/aCQ8f5QaaJ')">
+                    <img class="link-image" src="icons/discord.png" alt="">
+                    <p>Дискорд</p>
+                </a>
+                <a class="link" style="color: aqua;" href="" onclick="transition('https://t.me/beta_voice_assistant')">
+                    <img class="link-image" style=" width: 15px; height: 15px;" src="icons/telegram.png" alt="">
+                    <p>Телеграм</p>
+                </a>
+            </div>
+        </div>
+    </body>
+</html>

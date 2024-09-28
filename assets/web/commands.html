@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+
+        html, body {
+            height: calc(100% - 5%);
+            margin: 0;
+            background-color: rgb(0, 0, 0);
+            color: #ffffff;
+            font-family: 'Trebuchet MS', 'Helvetica Neue', Helvetica, sans-serif;
+            font-weight: bold;
+        }
+
+        .header {
+            width: 100%;
+            height: 50px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: rgb(20, 20, 20);
+            display: flex;
+            z-index: 2;
+        }
+
+        .left-container-headers {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            place-content: center;
+            flex-direction: column;
+        }
+
+        .link-main {
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        p {
+            margin: 0;
+            padding: 0;
+        }
+
+        button, input, textarea {
+            font-family: 'Trebuchet MS', 'Helvetica Neue', Helvetica, sans-serif;
+            font-weight: bold;
+        }
+
+        .right-container-headers {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            place-content: center;
+            gap: 20px;
+        }
+
+        .button.active {
+            position: relative;
+            background-color: transparent;
+            border: None;
+            padding: 4px;
+            color: #ffffff;
+            font-size: 20px;
+        }
+
+        .button.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            width: 0;
+            height: 2px;
+            background-color: #15ff00;
+            transition: width 0.3s, left 0.3s; /* Добавляем анимацию движения влево и вправо */
+        }
+
+        .button.active:hover::before {
+            width: 100%;
+            left: 0; /* При наведении оставляем полоску слева */
+        }
+
+        .button.active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            bottom: -2px;
+            width: 0;
+            height: 2px;
+            background-color: #15ff00;
+            transition: width 0.3s, right 0.3s; /* Анимация движения вправо и влево */
+        }
+
+        .button.active:hover::after {
+            width: 100%;
+            right: 0; /* При наведении оставляем полоску справа */
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10%;
+            gap: 10px;
+        }
+
+        .container-add-command {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 60%;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .button-create-command {
+            position: absolute;
+            right: 1%;
+            color: #ffffff;
+            height: 25px;
+            background-color: rgb(18, 230, 0);
+            border: none;
+            border-radius: 5px;
+        }
+
+        .settings-new-command {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 75%;
+
+            & :where(p) {
+                color: #15ff00;
+            }
+
+            & :where(input, textarea) {
+                border: none;
+                background-color: rgb(35, 35, 35);
+                border-radius: 5px;
+                color: #ffffff;
+                height: 25px;
+                padding-left: 5px;
+
+                &:focus {
+                    outline: none;
+                }
+
+                &.fixed-textarea {
+                    height: 75px;
+                    resize: none;
+                }
+
+                &.fixed-inputfile {
+                    display: none;
+                }
+
+            }
+
+            & :where(.select-file) {
+                width: 100%;
+                height: 25px;
+                border: none;
+                border-radius: 5px;
+                background-color: rgb(35, 35, 35);
+                color: #ffffff;
+            }
+        }
+
+        .comment {
+            color: gray;
+            font-size: 10px;
+        }
+
+        .button-result {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .button-save, .button-back {
+            width: 200px;
+            height: 25px;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+
+            &.color-save {
+                background-color: rgb(18, 196, 2);
+            }
+
+            &.color-back {
+                background-color: rgb(35, 35, 35);
+            }
+        }
+
+        /* Команды */
+
+        .commands {
+            width: 60%;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-bottom: 10%;
+        }
+
+        .command {
+            width: 100%;
+            height: 50px;
+            border-radius: 10px;
+            background-color: rgb(20, 20, 20);
+            display: flex;
+            align-items: center;
+        }
+
+        .container-name {
+            display: flex;
+            flex: 1;
+            place-content: flex-start;
+        }
+
+        .container-open-command {
+            display: flex;
+            flex: 1;
+            place-content: flex-end;
+            gap: 10px;
+        }
+
+        .name-command {
+            margin-left: 10%;
+        }
+
+        .open-command {
+            width: 120px;
+            height: 25px;
+            background-color: grey;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .delete-command {
+            width: 25px;
+            height: 25px;
+            background-color: red;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            margin-right: 10%;
+        }
+
+        /* Нижная меню */
+
+        .header-bottom {
+            width: 100%;
+            height: 50px;
+            background-color: rgb(20, 20, 20);
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .author {
+            color: grey;
+            font-size: 10px;
+        }
+
+        .link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            color: purple;
+            text-decoration: none;
+        }
+
+        .link-image {
+            width: 20px;
+            height: 20px;
+        }
+    
+    </style>
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script>
+        function setup() {
+            new QWebChannel(qt.webChannelTransport, function (channel) {
+                window.python = channel.objects.python; // Доступ к объекту Python
+                uploadSait();
+                updateCommands();
+            });
+        }
+
+        async function uploadSait() {
+            if (window.python) {
+                let jsonString = await window.python.get_information(); // Вызов метода Python при клике на кнопку
+                // Убедитесь, что информация доступна и в правильном формате
+
+                let information = JSON.parse(jsonString);
+
+                // Обновление контента на странице
+                document.querySelector('body > div.header > div.left-container-headers > a > p.name-application').textContent = information.name;
+                document.querySelector('body > div.header > div.left-container-headers > a > p:nth-child(2)').textContent = information.version;
+                document.querySelector('body > div.header-bottom > p').textContent = information.author;
+            }
+        }
+
+        async function add_window_create_command() {
+            let panel_commands = document.querySelector('body > div.container > div.container-add-command');
+
+            panel_commands.innerHTML = 
+            `<p>Добавление команды</p>
+            <div class="settings-new-command">
+                <div>
+                    <p>Название команды</p>
+                    <p class="comment">Команды не должны повторятся.</p>
+                </div>
+                <input type="text" value="">
+                <div>
+                    <p>Слова для отклика</p>
+                    <p class="comment">Введите слова или набор слов через запятую с помощью которых голосовой ассистент будет выполнять задачу.</p>
+                </div>
+                <textarea class="fixed-textarea"></textarea>
+                <div>
+                    <p>Ссылка</p>
+                    <p class="comment">Выберите ссылку на сайт, который будет открывать голосовой ассистент.</p>
+                </div>
+                <input type="text">
+                <div>
+                    <p>Путь до файла</p>
+                    <p class="comment">Выберите файл, который будет открывать голосовой ассистент.</p>
+                </div>
+                <input type="text">
+                <div class="button-result">
+                    <button class="button-save color-save" onclick="save_command()">Сохранить</button>
+                    <button class="button-back color-back" onclick="clearPanel()">Отмена</button>
+                </div>
+            </div>`
+
+            updateVisibility();
+        }
+
+        async function updateCommands() {
+            if (window.python) {
+                let jsonString = await window.python.info_commands();
+
+                let commands = JSON.parse(jsonString);
+
+                let commandsContainer  = document.querySelector('body > div.container > div.commands');
+
+                commandsContainer .innerHTML = ''
+
+                if (Object.keys(commands).length === 0) {
+                    commandsContainer.innerHTML = '<p>No commands found.</p>';
+                    return;
+                }
+
+                for (let [name, details] of Object.entries(commands)) {
+                    commandsContainer.innerHTML += 
+                    `<div class="command">
+                        <div class="container-name">
+                            <p class="name-command">${name}</p>
+                        </div>
+                        <div class="container-open-command">
+                            <button class="open-command" data-command-name="${name}">⚙ Настроить</button>
+                            <button class="delete-command" data-command-name="${name}">🗑</button>
+                        </div>
+                    </div>`
+                }
+
+                // Назначаем обработчик для кнопок "настроить"
+                commandsContainer.addEventListener('click', async (event) => {
+                    if (event.target.classList.contains('open-command')) {
+                        let commandName = event.target.getAttribute('data-command-name');
+                        await showCommandDetails(commandName);
+                    }
+
+                    if (event.target.classList.contains('delete-command')) {
+                        let commandName = event.target.getAttribute('data-command-name');
+                        await DelteCommand(commandName);
+                    }
+                });
+            }
+        }
+
+        function clearPanel() {
+            let panelCommands = document.querySelector('body > div.container > div.container-add-command');
+            panelCommands.innerHTML = '';
+        }
+
+        async function showCommandDetails(commandName) {
+            if (window.python) {
+                let jsonString = await window.python.info_command(commandName);
+                let commandDetails = JSON.parse(jsonString);
+
+                // Обработка и отображение информации о команде
+                // Здесь вы можете обновить UI, чтобы отобразить детали команды
+                console.log("Command details:", commandDetails);
+
+                // Пример: вывести детали команды в модальном окне
+                let panel_commands = document.querySelector('body > div.container > div.container-add-command');
+                panel_commands.innerHTML = 
+                `<p>Редактирование команды</p>
+                <div class="settings-new-command">
+                    <div>
+                        <p>Название команды</p>
+                        <p class="comment">Команды не должны повторятся.</p>
+                    </div>
+                    <input type="text" value="${commandName}">
+                    <div>
+                        <p>Слова для отклика</p>
+                        <p class="comment">Введите слова или набор слов через запятую с помощью которых голосовой ассистент будет выполнять задачу.</p>
+                    </div>
+                    <textarea class="fixed-textarea">${commandDetails.word}</textarea>
+                    <div>
+                        <p>Ссылка</p>
+                        <p class="comment">Выберите ссылку на сайт, который будет открывать голосовой ассистент.</p>
+                    </div>
+                    <input type="text" value="${commandDetails.url}">
+                    <div>
+                        <p>Путь до файла</p>
+                        <p class="comment">Выберите файл, который будет открывать голосовой ассистент.</p>
+                    </div>
+                    <input type="text" value="${commandDetails.program}">
+                    <div class="button-result">
+                        <button class="button-save color-save" onclick="re_record_save('${commandName}')">Сохранить</button>
+                        <button class="button-back color-back" onclick="clearPanel()" >Отмена</button>
+                    </div>
+                </div>`;
+
+                updateVisibility();
+
+                window.scrollTo({
+                    top: 0,
+                });
+            }
+        }
+
+        async function DelteCommand(commandName) {
+            if (window.python) {
+                await window.python.delete_command(commandName);
+                updateCommands();
+            }
+        }
+
+        async function save_command() {
+            if (window.python) {
+                let name_command = document.querySelector('body > div.container > div.container-add-command > div > input[type=text]:nth-child(2)').value;
+                let words = document.querySelector('body > div.container > div.container-add-command > div > textarea').value;
+                let url_text = document.querySelector('body > div.container > div.container-add-command > div > input[type=text]:nth-child(6)').value;
+                let file_text = document.querySelector('body > div.container > div.container-add-command > div > input[type=text]:nth-child(8)').value;
+
+                if (name_command.trim() && words.trim() && (url_text.trim() || file_text.trim())) {
+                    let command_settings = {
+                        name_command: name_command,
+                        word: words,
+                        url_text: url_text,
+                        file_text: file_text
+                    };
+
+                    let settingsJson = JSON.stringify(command_settings);
+
+                    await window.python.save_command(settingsJson);
+
+                    document.querySelector('body > div.container > div.container-add-command').innerHTML = '';
+
+                    updateCommands();
+                }
+            }
+        }
+
+        async function re_record_save(commandName) {
+            if (window.python) {
+                let name_command = document.querySelector('body > div.container > div.container-add-command > div > input[type=text]:nth-child(2)').value;
+                let words = document.querySelector('body > div.container > div.container-add-command > div > textarea').value;
+                let url_text = document.querySelector('body > div.container > div.container-add-command > div > input[type=text]:nth-child(6)').value;
+                let file_text = document.querySelector('body > div.container > div.container-add-command > div > input[type=text]:nth-child(8)').value;
+
+                if (name_command.trim() && words.trim() && (url_text.trim() || file_text.trim())) {
+                    let command_settings = {
+                        name_command: name_command,
+                        word: words,
+                        url_text: url_text,
+                        file_text: file_text
+                    };
+
+                    let settingsJson = JSON.stringify(command_settings);
+
+                    await window.python.re_record_command(settingsJson, commandName);
+
+                    document.querySelector('body > div.container > div.container-add-command').innerHTML = '';
+
+                    updateCommands();
+                }
+            }
+        }
+
+        async function transition(link) {
+            if (window.python) {
+                await window.python.transition(link);
+            }
+        }
+
+        function updateVisibility() {
+            const selectFileButton = document.querySelector('body > div.container > div.container-add-command > div > button');
+
+            const urlText = document.querySelector('body > div.container > div.container-add-command > div > div:nth-child(5)');
+            const urlInput = document.querySelector('body > div.container > div.container-add-command > div > input[type=text]:nth-child(6)');
+            
+            const fileText = document.querySelector('body > div.container > div.container-add-command > div > div:nth-child(7)');
+            const fileInput = document.querySelector('body > div.container > div.container-add-command > div > input[type=text]:nth-child(8)');
+
+            function updateFileVisibility() {
+                if (urlInput.value.trim() !== '') {
+                    fileText.style.display = 'none';
+                    fileInput.style.display = 'none';
+                } else {
+                    fileText.style.display = 'block';
+                    fileInput.style.display = 'block';
+                }
+            }
+
+            urlInput.addEventListener('input', updateFileVisibility);
+
+            updateFileVisibility();
+
+            function updateUrlVisibility() {
+                if (fileInput.value.trim() !== '') {
+                    urlText.style.display  = 'none';
+                    urlInput.style.display  = 'none';
+                } else {
+                    urlText.style.display  = 'block';
+                    urlInput.style.display  = 'block';
+                }
+            }
+
+            fileInput.addEventListener('input', updateUrlVisibility);
+
+            updateUrlVisibility();
+
+        };
+
+
+        window.onload = setup;
+    </script>
+</head>
+    <body>
+        <div class="header">
+            <div class="left-container-headers">
+                <a class="link-main" href="main.html">
+                    <p class="name-application"></p>
+                    <p></p>
+                </a>
+            </div>
+            <div class="right-container-headers">
+                <button class="button active">🤖 Команды</button>
+                <form action="settings.html">
+                    <button class="button active">⚙ Настройки</button>
+                </form>
+            </div>
+        </div>
+        <div class="container">
+            <button class="button-create-command" onclick="add_window_create_command()">Создать команду</button>
+            <div class="container-add-command"></div>
+            <div class="commands">
+                <div class="command">
+                    <div class="container-name">
+                        <p class="name-command">программа</p>
+                    </div>
+                    <div class="container-open-command">
+                        <button class="open-command">⚙ Настроить</button>
+                        <button class="delete-command">🗑</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="header-bottom">
+            <p class="author"></p>
+            <div style="display: flex; gap: 25px; align-items: center; justify-content: center;">
+                <a class="link" href="" onclick="transition('https://discord.gg/aCQ8f5QaaJ')">
+                    <img class="link-image" src="icons/discord.png" alt="">
+                    <p>Дискорд</p>
+                </a>
+                <a class="link" style="color: aqua;" href="" onclick="transition('https://t.me/beta_voice_assistant')">
+                    <img class="link-image" style=" width: 15px; height: 15px;" src="icons/telegram.png" alt="">
+                    <p>Телеграм</p>
+                </a>
+            </div>
+        </div>
+    </body>
+</html>
